@@ -10,72 +10,56 @@
 
   <h2>Reset your BOFE App Password</h2>
 
-  <!-- نموذج إرسال البريد -->
-  <div id="form-container">
-    <p>Enter your email address to receive a password reset link:</p>
-    <form id="email-form">
-      <input type="email" id="email" placeholder="Enter your email" required style="padding: 10px; width: 250px;" />
-      <br><br>
-      <button type="submit" style="padding: 10px 20px;">Send Reset Link</button>
-    </form>
-  </div>
-
-  <!-- نموذج تعيين كلمة المرور -->
-  <div id="reset-form-container" style="display: none;">
+  <div id="form-container" style="display: none;">
     <p>Enter your new password:</p>
     <input type="password" id="new-password" placeholder="New Password" style="padding: 10px; width: 250px;" />
     <br><br>
     <button onclick="resetPassword()" style="padding: 10px 20px;">Update Password</button>
-    <p id="status" style="margin-top: 15px;"></p>
+    <p id="status"></p>
   </div>
+
+  <div id="error-message" style="color: red;"></div>
 
   <script>
     const supabase = supabase.createClient(
-      'https://nasfqhqjgxycluzeffto.supabase.co',
+      'https://nasfqhqjgxvcluzeffto.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hc2ZxaHFqZ3h5Y2x1emVmZnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyODU1NzAsImV4cCI6MjA2ODg2MTU3MH0.ghJyWDG5LnNH7pjS5jXwJ62RQ_EURcCkKFHpPHUoByM'
     );
 
-    // ✅ عند تحميل الصفحة، تحقّق من وجود access_token في الرابط
-    window.addEventListener('load', async () => {
-      const hash = window.location.hash;
-      const params = new URLSearchParams(hash.substring(1));
+    async function main() {
+      const params = new URLSearchParams(window.location.hash.substring(1));
       const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      const type = params.get('type');
 
-      if (access_token) {
-        // ✅ تحويل التوكن إلى جلسة صالحة
-        const { error } = await supabase.auth.setSession({
+      if (access_token && type === 'recovery') {
+        const { data, error } = await supabase.auth.setSession({
           access_token,
-          refresh_token: ''
+          refresh_token,
         });
 
-        if (!error) {
-          // ✅ إظهار نموذج تعيين كلمة المرور
-          document.getElementById('form-container').style.display = 'none';
-          document.getElementById('reset-form-container').style.display = 'block';
+        if (error) {
+          document.getElementById('error-message').innerText = 'Session error: ' + error.message;
         } else {
-          document.getElementById('status').innerText = 'فشل في التحقق من الجلسة';
+          document.getElementById('form-container').style.display = 'block';
         }
+      } else {
+        document.getElementById('error-message').innerText = 'Invalid or expired recovery link.';
       }
-    });
+    }
 
-    // ✅ إرسال رابط استعادة كلمة المرور من الصفحة مباشرة (اختياري)
-    document.getElementById('email-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://hantantin.github.io/supabase-reset-page/'
-      });
-      alert(error ? error.message : 'Reset link sent! Check your email.');
-    });
-
-    // ✅ تنفيذ التحديث عند تعيين كلمة مرور جديدة
     async function resetPassword() {
       const newPassword = document.getElementById('new-password').value;
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      document.getElementById('status').innerText = error
-        ? error.message
-        : 'Password updated successfully!';
+
+      if (error) {
+        document.getElementById('status').innerText = 'Error: ' + error.message;
+      } else {
+        document.getElementById('status').innerText = 'Password updated successfully!';
+      }
     }
+
+    main();
   </script>
 
 </body>
