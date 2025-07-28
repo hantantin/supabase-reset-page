@@ -33,8 +33,7 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hc2ZxaHFqZ3h5Y2x1emVmZnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyODU1NzAsImV4cCI6MjA2ODg2MTU3MH0.ghJyWDG5LnNH7pjS5jXwJ62RQ_EURcCkKFHpPHUoByM'
     );
 
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.slice(1));
+    const params = new URLSearchParams(window.location.search + window.location.hash);
     const access_token = params.get('access_token');
 
     if (access_token) {
@@ -43,7 +42,7 @@
 
       supabase.auth.setSession({
         access_token,
-        refresh_token: '' // يمكن تجاهله
+        refresh_token: '' // لا حاجة له في هذه الحالة
       });
     }
 
