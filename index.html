@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>تم تغيير كلمة المرور</title>
+  <title>Reset BOFE Password</title>
 </head>
-<body style="font-family: sans-serif; padding: 50px; text-align: center;">
-  <h2>تم تغيير كلمة المرور بنجاح</h2>
-  <p>الآن يمكنك العودة للتطبيق وتسجيل الدخول بكلمة المرور الجديدة.</p>
+<body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+  <h2>Reset your BOFE App Password</h2>
+  <p>Enter your email address to receive a password reset link:</p>
+  <form action="https://nasfqhqxjxycluzeffto.supabase.co/auth/v1/recover" method="POST">
+    <input type="email" name="email" placeholder="Enter your email" required style="padding: 10px; width: 250px;" />
+    <br><br>
+    <button type="submit" style="padding: 10px 20px;">Send Reset Link</button>
+  </form>
 </body>
 </html>
