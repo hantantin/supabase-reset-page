@@ -27,48 +27,44 @@
     );
 
     function extractParams() {
-      const full = window.location.href;
-      const queryString = full.includes('?') ? full.split('?')[1] : '';
-      const hashString = full.includes('#') ? full.split('#')[1] : '';
-
-      const combined = queryString + '&' + hashString;
-      const params = new URLSearchParams(combined);
-
+      const url = window.location.href;
+      const hash = url.split('#')[1] || '';
+      const params = new URLSearchParams(hash);
       return {
         access_token: params.get('access_token'),
         refresh_token: params.get('refresh_token'),
-        type: params.get('type'),
+        type: params.get('type')
       };
     }
 
     async function main() {
-      const { access_token, refresh_token, type } = extractParams();
+      setTimeout(async () => {
+        const { access_token, refresh_token, type } = extractParams();
 
-      if (access_token && type === 'recovery') {
-        const { error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
+        if (access_token && type === 'recovery') {
+          const { error } = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+          });
 
-        if (error) {
-          document.getElementById('error-message').innerText = 'Session error: ' + error.message;
+          if (error) {
+            document.getElementById('error-message').innerText = 'Session error: ' + error.message;
+          } else {
+            document.getElementById('form-container').style.display = 'block';
+          }
         } else {
-          document.getElementById('form-container').style.display = 'block';
+          document.getElementById('error-message').innerText = 'Invalid or expired recovery link.';
         }
-      } else {
-        document.getElementById('error-message').innerText = 'Invalid or expired recovery link.';
-      }
+      }, 500); // تأخير نصف ثانية لقراءة الرابط في الجوال
     }
 
     async function resetPassword() {
       const newPassword = document.getElementById('new-password').value;
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-
       document.getElementById('status').innerText = error ? 'Error: ' + error.message : 'Password updated successfully!';
     }
 
     main();
   </script>
-
 </body>
 </html>
