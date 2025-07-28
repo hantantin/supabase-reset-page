@@ -15,7 +15,7 @@
     <input type="password" id="new-password" placeholder="New Password" style="padding: 10px; width: 250px;" />
     <br><br>
     <button onclick="resetPassword()" style="padding: 10px 20px;">Update Password</button>
-    <p id="status"></p>
+    <p id="status" style="color: green;"></p>
   </div>
 
   <div id="error-message" style="color: red;"></div>
@@ -26,19 +26,23 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hc2ZxaHFqZ3h5Y2x1emVmZnRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyODU1NzAsImV4cCI6MjA2ODg2MTU3MH0.ghJyWDG5LnNH7pjS5jXwJ62RQ_EURcCkKFHpPHUoByM'
     );
 
-    function getParams() {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const queryParams = new URLSearchParams(window.location.search);
+    function extractParams() {
+      const full = window.location.href;
+      const queryString = full.includes('?') ? full.split('?')[1] : '';
+      const hashString = full.includes('#') ? full.split('#')[1] : '';
 
-      const access_token = hashParams.get('access_token') || queryParams.get('access_token');
-      const refresh_token = hashParams.get('refresh_token') || queryParams.get('refresh_token');
-      const type = hashParams.get('type') || queryParams.get('type');
+      const combined = queryString + '&' + hashString;
+      const params = new URLSearchParams(combined);
 
-      return { access_token, refresh_token, type };
+      return {
+        access_token: params.get('access_token'),
+        refresh_token: params.get('refresh_token'),
+        type: params.get('type'),
+      };
     }
 
     async function main() {
-      const { access_token, refresh_token, type } = getParams();
+      const { access_token, refresh_token, type } = extractParams();
 
       if (access_token && type === 'recovery') {
         const { error } = await supabase.auth.setSession({
@@ -60,11 +64,7 @@
       const newPassword = document.getElementById('new-password').value;
       const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-      if (error) {
-        document.getElementById('status').innerText = 'Error: ' + error.message;
-      } else {
-        document.getElementById('status').innerText = 'Password updated successfully!';
-      }
+      document.getElementById('status').innerText = error ? 'Error: ' + error.message : 'Password updated successfully!';
     }
 
     main();
